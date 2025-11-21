@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aprendo a escribir</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="app">
+    <h1>Aprendo a escribir</h1>
+
+    <section class="card">
+      <div class="image-wrap">
+        <img id="wordImage" alt="imagen palabra" src="" />
+      </div>
+
+      <div class="controls">
+        <button id="prevBtn" aria-label="anterior">◀</button>
+        <button id="nextBtn" aria-label="siguiente">▶</button>
+        <button id="resetBtn" aria-label="reiniciar">Reiniciar</button>
+      </div>
+
+      <div id="boxes" class="boxes" aria-live="polite"></div>
+
+      <div id="letters" class="letters"></div>
+
+      <div id="message" class="message" role="status"></div>
+    </section>
+
+    <section class="info">
+      <h2>Instrucciones</h2>
+      <p>Haz click en las letras en el orden correcto para completar la palabra que representa la imagen. Si te equivocas, la letra parpadeará en rojo. Usa los botones para navegar entre imágenes.</p>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
