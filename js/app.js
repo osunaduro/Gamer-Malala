@@ -140,6 +140,8 @@ function loadList(){
         messageEl.textContent = 'No hay imágenes en la carpeta images (o images/list.php no devolvió datos)';
         return;
       }
+      // Mezclar aleatoriamente las imágenes
+      shuffle(images);
       current = 0;
       buildForImage(images[current]);
     })
