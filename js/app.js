@@ -3,9 +3,7 @@ const imageEl = document.getElementById('wordImage');
 const boxesEl = document.getElementById('boxes');
 const lettersEl = document.getElementById('letters');
 const messageEl = document.getElementById('message');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const resetBtn = document.getElementById('resetBtn');
+const passBtn = document.getElementById('passBtn');
 
 let images = [];
 let current = 0;
@@ -151,18 +149,9 @@ function loadList(){
     });
 }
 
-prevBtn.addEventListener('click', ()=>{
-  if(images.length===0) return;
-  current = (current - 1 + images.length) % images.length;
-  buildForImage(images[current]);
-});
-nextBtn.addEventListener('click', ()=>{
+passBtn.addEventListener('click', ()=>{
   if(images.length===0) return;
   current = (current + 1) % images.length;
-  buildForImage(images[current]);
-});
-resetBtn.addEventListener('click', ()=>{
-  if(images.length===0) return;
   buildForImage(images[current]);
 });
 
