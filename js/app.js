@@ -1,3 +1,6 @@
+import { Timer } from './timer.js';
+import { Storage } from './storage.js';
+
 // Lógica principal de la app
 const imageEl = document.getElementById('wordImage');
 const boxesEl = document.getElementById('boxes');
@@ -168,4 +171,98 @@ window.addEventListener('keydown', (e)=>{
 // iniciar
 document.addEventListener('DOMContentLoaded', ()=>{
   loadList();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nameModal = document.getElementById('nameModal');
+  const playerNameInput = document.getElementById('playerNameInput');
+  const startGameBtn = document.getElementById('startGameBtn');
+  const playerNameDisplay = document.getElementById('playerNameDisplay');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const showRankingBtn = document.getElementById('showRankingBtn');
+
+  const GAME_DURATION = 10 * 60; // 10 minutos en segundos
+  let playerName = 'Jugador';
+  let wordsShown = 0;
+  let wordsCompleted = 0;
+  let gameStartTs = 0;
+
+  const timer = new Timer();
+
+  function startGame() {
+    playerName = (playerNameInput.value || 'Jugador').trim();
+    playerNameDisplay.textContent = `Jugador: ${playerName}`;
+    nameModal.style.display = 'none';
+    wordsShown = 0;
+    wordsCompleted = 0;
+    gameStartTs = Date.now();
+
+    // comenzar temporizador
+    timer.start(GAME_DURATION, (remaining) => {
+      timerDisplay.textContent = Timer.format(remaining);
+    }, onTimeUp);
+
+    // TODO: inicializar o reiniciar la lógica actual del juego (mostrar primera palabra)
+    // Si tu app.js ya tiene función para iniciar juego, llama a ella aquí.
+    if (typeof initGame === 'function') initGame(); // optional hook
+  }
+
+  startGameBtn.addEventListener('click', startGame);
+  playerNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') startGame();
+  });
+
+  // Mostrar ranking
+  showRankingBtn.addEventListener('click', () => {
+    const top = Storage.getTop();
+    if (!top || top.length === 0) {
+      alert('No hay registros aún.');
+      return;
+    }
+    const text = top.map((r, i) => `${i+1}. ${r.name} — ${r.completed}/${r.total} en ${r.timeTakenSeconds || 0}s`).join('\n');
+    alert('Top 10:\n' + text);
+  });
+
+  function onTimeUp() {
+    endGame();
+  }
+
+  // Funciones para que el juego actual actualice contadores:
+  // Llama a incrementShown() cada vez que se muestra una nueva palabra.
+  // Llama a incrementCompleted() cuando el jugador completa correctamente una palabra.
+  window.incrementShown = function() {
+    wordsShown += 1;
+  };
+
+  window.incrementCompleted = function() {
+    wordsCompleted += 1;
+  };
+
+  function endGame() {
+    timer.stop();
+    const timeTakenSeconds = Math.floor((Date.now() - gameStartTs) / 1000);
+    const record = {
+      name: playerName,
+      completed: wordsCompleted,
+      total: wordsShown,
+      timeTakenSeconds,
+      timestamp: Date.now()
+    };
+    const top = Storage.addRecord(record);
+    // mostrar resumen
+    alert(`Tiempo terminado.\nCompletadas: ${wordsCompleted}/${wordsShown}\nTu puesto (si quedó en top):\n` +
+      (top.findIndex(r => r.timestamp === record.timestamp) + 1 || 'No entró en top'));
+    // TODO: detener/poner en pausa la lógica del juego actual
+    if (typeof pauseGame === 'function') pauseGame(); // optional hook
+  }
+
+  // Exponer función para terminar manualmente (por ejemplo botón)
+  window.endCurrentGame = endGame;
+
+  // Si quieres que el modal desaparezca y comience con nombre guardado previamente:
+  const lastRecords = Storage.getTop();
+  if (lastRecords && lastRecords.length > 0 && lastRecords[0].name) {
+    // prefill input con último jugador conocido
+    playerNameInput.value = lastRecords[0].name;
+  }
 });

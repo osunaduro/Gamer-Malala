@@ -1,0 +1,44 @@
+{
+  "topPlayers": [
+    {
+      "name": "Jugador1",
+      "score": 9
+    },
+    {
+      "name": "Jugador2",
+      "score": 8
+    },
+    {
+      "name": "Jugador3",
+      "score": 7
+    },
+    {
+      "name": "Jugador4",
+      "score": 6
+    },
+    {
+      "name": "Jugador5",
+      "score": 5
+    },
+    {
+      "name": "Jugador6",
+      "score": 4
+    },
+    {
+      "name": "Jugador7",
+      "score": 3
+    },
+    {
+      "name": "Jugador8",
+      "score": 2
+    },
+    {
+      "name": "Jugador9",
+      "score": 1
+    },
+    {
+      "name": "Jugador10",
+      "score": 0
+    }
+  ]
+}

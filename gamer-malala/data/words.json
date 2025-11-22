@@ -1,0 +1,42 @@
+[
+  {
+    "word": "gato",
+    "image": "images/gato.png"
+  },
+  {
+    "word": "perro",
+    "image": "images/perro.png"
+  },
+  {
+    "word": "casa",
+    "image": "images/casa.png"
+  },
+  {
+    "word": "árbol",
+    "image": "images/arbol.png"
+  },
+  {
+    "word": "auto",
+    "image": "images/auto.png"
+  },
+  {
+    "word": "pelota",
+    "image": "images/pelota.png"
+  },
+  {
+    "word": "flor",
+    "image": "images/flor.png"
+  },
+  {
+    "word": "libro",
+    "image": "images/libro.png"
+  },
+  {
+    "word": "silla",
+    "image": "images/silla.png"
+  },
+  {
+    "word": "mesa",
+    "image": "images/mesa.png"
+  }
+]

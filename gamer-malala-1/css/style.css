@@ -1,0 +1,79 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+
+.app {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+}
+
+.card {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.image-wrap {
+  text-align: center;
+}
+
+#wordImage {
+  max-width: 100%;
+  height: auto;
+}
+
+.controls {
+  text-align: center;
+  margin: 10px 0;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.boxes {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.letters {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.message {
+  text-align: center;
+  color: red;
+}
+
+.info {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+}

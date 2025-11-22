@@ -16,7 +16,12 @@
       </div>
 
       <div class="controls">
-        <button id="passBtn" aria-label="pasar">Pasar</button>
+        <div class="player-info">
+          <span id="playerNameDisplay">Jugador: —</span>
+          <span id="timerDisplay">00:00</span>
+          <button id="showRankingBtn" type="button" aria-label="ver ranking">Ranking</button>
+        </div>
+        <button id="passBtn" type="button" aria-label="pasar">Pasar</button>
       </div>
 
       <div id="boxes" class="boxes" aria-live="polite"></div>
@@ -32,6 +37,19 @@
     </section>
   </main>
 
+  <!-- Modal simple para pedir nombre al iniciar -->
+  <div id="nameModal" class="modal" aria-hidden="false" role="dialog" aria-modal="true" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);">
+    <div style="background:#fff;padding:20px;border-radius:6px;max-width:320px;width:90%">
+      <h3>Ingresa tu nombre</h3>
+      <input id="playerNameInput" type="text" placeholder="Tu nombre" style="width:100%;padding:8px;margin:8px 0;" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="startGameBtn" type="button">Comenzar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/timer.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
