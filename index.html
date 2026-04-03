@@ -3,53 +3,133 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Aprendo a escribir</title>
+  <title>Aprendo a escribir - Juego Malala</title>
+  <!-- Bootswatch Minty theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/minty/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <main class="app">
-    <h1>Aprendo a escribir</h1>
-
-    <section class="card">
-      <div class="image-wrap">
-        <img id="wordImage" alt="imagen palabra" src="" />
+<body class="bg-light">
+  
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1">🎨 Aprendo a escribir</span>
+      <div class="d-flex align-items-center">
+        <span id="playerNameDisplay" class="badge bg-light text-primary me-3 fs-6">Jugador: —</span>
+        <span id="timerDisplay" class="badge bg-secondary fs-5 font-monospace">00:00</span>
       </div>
+    </div>
+  </nav>
 
-      <div class="controls">
-        <div class="player-info">
-          <span id="playerNameDisplay">Jugador: —</span>
-          <span id="timerDisplay">00:00</span>
-          <button id="showRankingBtn" type="button" aria-label="ver ranking">Ranking</button>
+  <main class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        
+        <div class="card shadow border-0 rounded-4 overflow-hidden mb-4">
+          <div class="card-body p-0">
+            <div class="image-container bg-white d-flex align-items-center justify-content-center p-3" style="height: 300px;">
+              <img id="wordImage" class="img-fluid rounded-3 h-100 object-fit-contain" alt="Cargando..." src="" />
+            </div>
+          </div>
+          
+          <div class="card-footer bg-white border-0 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <button id="passBtn" class="btn btn-outline-warning rounded-pill px-4 shadow-sm" type="button">
+                Saltar ⏭️
+              </button>
+              <button id="showRankingBtn" class="btn btn-outline-info rounded-pill px-4 shadow-sm" type="button">
+                Ranking 🏆
+              </button>
+            </div>
+
+            <!-- Cajas donde aparecen las letras al hacer click -->
+            <div id="boxes" class="d-flex flex-wrap gap-2 justify-content-center mb-4 min-vh-10" aria-live="polite"></div>
+
+            <!-- Teclado de letras mezcladas -->
+            <div id="letters" class="d-flex flex-wrap gap-2 justify-content-center mb-3"></div>
+
+            <div id="message" class="text-center fw-bold fs-5 h-25" role="status"></div>
+          </div>
         </div>
-        <button id="passBtn" type="button" aria-label="pasar">Pasar</button>
+
+        <div class="alert alert-info rounded-4 shadow-sm">
+          <h5 class="alert-heading">¿Cómo jugar?</h5>
+          <p class="mb-0 small">Haz click en las letras en el orden correcto para completar la palabra. Si te equivocas, la letra parpadeará en rojo. ¡Diviértete aprendiendo!</p>
+        </div>
+
       </div>
-
-      <div id="boxes" class="boxes" aria-live="polite"></div>
-
-      <div id="letters" class="letters"></div>
-
-      <div id="message" class="message" role="status"></div>
-    </section>
-
-    <section class="info">
-      <h2>Instrucciones</h2>
-      <p>Haz click en las letras en el orden correcto para completar la palabra que representa la imagen. Si te equivocas, la letra parpadeará en rojo. Usa los botones para navegar entre imágenes.</p>
-    </section>
+    </div>
   </main>
 
-  <!-- Modal simple para pedir nombre al iniciar -->
-  <div id="nameModal" class="modal" aria-hidden="false" role="dialog" aria-modal="true" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);">
-    <div style="background:#fff;padding:20px;border-radius:6px;max-width:320px;width:90%">
-      <h3>Ingresa tu nombre</h3>
-      <input id="playerNameInput" type="text" placeholder="Tu nombre" style="width:100%;padding:8px;margin:8px 0;" />
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button id="startGameBtn" type="button">Comenzar</button>
+  <!-- Modal de Inicio -->
+  <div class="modal fade" id="nameModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="nameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header bg-primary text-white border-0 py-3">
+          <h5 class="modal-title" id="nameModalLabel">¡Hola! Ingresa tu nombre</h5>
+        </div>
+        <div class="modal-body p-4">
+          <input id="playerNameInput" type="text" class="form-control form-control-lg rounded-pill border-primary text-center" placeholder="Tu nombre artístico" autofocus />
+        </div>
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button id="startGameBtn" type="button" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm">¡Comenzar! 🚀</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/timer.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Modal de Ranking -->
+  <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header bg-info text-white border-0">
+          <h5 class="modal-title" id="rankingModalLabel">Ranking de Estrellas 🏆</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Puesto</th>
+                  <th>Nombre</th>
+                  <th class="text-center">Palabras</th>
+                  <th class="text-center">Tiempo</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTableBody">
+                <!-- Se llena con JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Fin de Juego -->
+  <div class="modal fade" id="gameOverModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4 text-center">
+        <div class="modal-body p-5">
+          <h2 class="display-4 text-primary mb-4">¡Tiempo terminado! ⏰</h2>
+          <p class="fs-4">Buen trabajo, <span id="finalPlayerName" class="fw-bold text-success"></span>.</p>
+          <div class="bg-light p-4 rounded-4 mb-4">
+            <p class="mb-1 text-muted">Completaste</p>
+            <h3 class="display-5 mb-0"><span id="finalCompletedCount">0</span>/<span id="finalTotalCount">0</span></h3>
+            <p class="mb-0">palabras correctamente.</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg rounded-pill px-5" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

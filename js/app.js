@@ -1,268 +1,318 @@
 import { Timer } from './timer.js';
 import { Storage } from './storage.js';
 
-// Lógica principal de la app
-const imageEl = document.getElementById('wordImage');
-const boxesEl = document.getElementById('boxes');
-const lettersEl = document.getElementById('letters');
-const messageEl = document.getElementById('message');
-const passBtn = document.getElementById('passBtn');
+/**
+ * Juego Malala: Aprendo a escribir
+ * Refactorización completa con Bootstrap 5, Minty y Síntesis de voz.
+ */
 
-let images = [];
-let current = 0;
-let targetLetters = []; // sin espacios
-let boxes = []; // nodos .box para las letras (sin espacios)
-let nextPos = 0;
+// --- Configuración y Estado ---
+const GAME_DURATION = 5 * 60; // 5 minutos por defecto
+const state = {
+  images: [],
+  currentIdx: 0,
+  targetLetters: [],
+  nextPos: 0,
+  playerName: 'Jugador',
+  wordsShown: 0,
+  wordsCompleted: 0,
+  gameStartTs: 0,
+  isRunning: false
+};
 
-// WebAudio: funciones simples para reproducir tonos de acierto/error
-const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-function ensureAudio(){
-  if(!audioCtx){
-    try{ audioCtx = new AudioContextClass(); }catch(e){ audioCtx = null; }
+// --- Elementos DOM ---
+const elements = {
+  image: document.getElementById('wordImage'),
+  boxes: document.getElementById('boxes'),
+  letters: document.getElementById('letters'),
+  message: document.getElementById('message'),
+  passBtn: document.getElementById('passBtn'),
+  showRankingBtn: document.getElementById('showRankingBtn'),
+  playerNameDisplay: document.getElementById('playerNameDisplay'),
+  timerDisplay: document.getElementById('timerDisplay'),
+  // Modales (instancias de Bootstrap)
+  nameModal: new bootstrap.Modal(document.getElementById('nameModal')),
+  rankingModal: new bootstrap.Modal(document.getElementById('rankingModal')),
+  gameOverModal: new bootstrap.Modal(document.getElementById('gameOverModal')),
+  // Inputs y Displays de Modales
+  nameInput: document.getElementById('playerNameInput'),
+  startGameBtn: document.getElementById('startGameBtn'),
+  rankingTableBody: document.getElementById('rankingTableBody'),
+  finalPlayerName: document.getElementById('finalPlayerName'),
+  finalCompletedCount: document.getElementById('finalCompletedCount'),
+  finalTotalCount: document.getElementById('finalTotalCount')
+};
+
+const timer = new Timer();
+
+// --- Utilidades de Audio y Voz ---
+const audio = {
+  ctx: null,
+  ensureCtx() {
+    if (!this.ctx) {
+      try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+  },
+  playTone(freq, duration = 0.15, type = 'sine', gain = 0.1) {
+    this.ensureCtx();
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(this.ctx.destination);
+    const now = this.ctx.currentTime;
+    o.start(now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    o.stop(now + duration + 0.05);
+  },
+  success() {
+    this.playTone(660, 0.1, 'sine', 0.1);
+    setTimeout(() => this.playTone(880, 0.15, 'sine', 0.1), 100);
+  },
+  error() {
+    this.playTone(220, 0.2, 'sawtooth', 0.15);
+  },
+  speak(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel(); // Detener locuciones previas
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
   }
-}
+};
 
-function playTone(freq, duration = 0.12, type = 'sine', gain = 0.18){
-  ensureAudio();
-  if(!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.value = gain;
-  o.connect(g); g.connect(audioCtx.destination);
-  const now = audioCtx.currentTime;
-  o.start(now);
-  g.gain.setValueAtTime(gain, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + duration);
-  o.stop(now + duration + 0.02);
-}
+// --- Lógica de Juego ---
 
-function playSuccess(){
-  // pequeña secuencia de dos tonos ascendentes
-  ensureAudio(); if(!audioCtx) return;
-  playTone(660, 0.12, 'sine', 0.14);
-  setTimeout(()=>playTone(880, 0.14, 'sine', 0.14), 140);
-}
-
-function playError(){
-  // tono bajo corto
-  playTone(220, 0.18, 'sawtooth', 0.22);
-}
-
-function normalizeWord(name){
-  return name
-    .replace(/\.[^/.]+$/, '')
-    .replace(/[_-]+/g, ' ')
+function normalizeWord(filename) {
+  return filename
+    .replace(/\.[^/.]+$/, '') // Quitar extensión
+    .replace(/[_-]+/g, ' ')   // Guiones por espacios
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Quitar acentos para comparación
 }
 
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
 
-function buildForImage(filename){
-  const word = normalizeWord(filename);
-  imageEl.src = `images/${filename}`;
-  imageEl.alt = word;
-  // preparar cajas
-  boxesEl.innerHTML = '';
-  lettersEl.innerHTML = '';
-  messageEl.textContent = '';
-  nextPos = 0;
-
-  const chars = Array.from(word);
-  // crear cajas visuales; guardamos referencias sólo para letras (no espacios)
-  boxes = [];
-  chars.forEach(ch=>{
-    if(ch === ' '){
-      const s = document.createElement('div');
-      s.className = 'box space';
-      boxesEl.appendChild(s);
-    } else {
-      const b = document.createElement('div');
-      b.className = 'box';
-      b.dataset.filled = 'false';
-      boxesEl.appendChild(b);
-      boxes.push(b);
-    }
-  });
-
-  targetLetters = chars.filter(c=>c!==' ');
-
-  // crear botones con letras mezcladas
-  const letterPool = [...targetLetters];
-  shuffle(letterPool);
-  letterPool.forEach((ltr, idx)=>{
-    const btn = document.createElement('button');
-    btn.className = 'letter-btn';
-    btn.textContent = ltr.toUpperCase();
-    btn.dataset.letter = ltr;
-    btn.dataset.idx = idx;
-    btn.addEventListener('click', ()=> onLetterClick(btn));
-    lettersEl.appendChild(btn);
-  });
-}
-
-function onLetterClick(btn){
-  const ltr = btn.dataset.letter;
-  if(btn.disabled) return;
-  if(ltr === targetLetters[nextPos]){
-    // colocar en la siguiente caja libre
-    const box = boxes[nextPos];
-    box.textContent = ltr.toUpperCase();
-    box.dataset.filled = 'true';
-    btn.disabled = true;
-    nextPos++;
-    if(nextPos >= targetLetters.length){
-      messageEl.textContent = '¡Muy bien! ✅';
-      messageEl.style.color = 'var(--success)';
-      playSuccess();
-    }
-  } else {
-    btn.classList.add('wrong');
-    setTimeout(()=>btn.classList.remove('wrong'),350);
-    // pequeña retroalimentación
-    playError();
-  }
-}
-
-function loadList(){
-  // solicitamos al endpoint PHP que lista automáticamente las imágenes
-  fetch('images/list.php')
-    .then(r=>r.json())
-    .then(arr=>{
-      images = arr;
-      if(!images || images.length===0){
-        messageEl.textContent = 'No hay imágenes en la carpeta images (o images/list.php no devolvió datos)';
-        return;
-      }
-      // Mezclar aleatoriamente las imágenes
-      shuffle(images);
-      current = 0;
-      buildForImage(images[current]);
-    })
-    .catch(err=>{
-      console.error(err);
-      messageEl.textContent = 'Error cargando images/list.php';
-    });
-}
-
-passBtn.addEventListener('click', ()=>{
-  if(images.length===0) return;
-  current = (current + 1) % images.length;
-  buildForImage(images[current]);
-});
-
-// Soporte teclado: presionar la letra equivalente habilita el primer botón disponible con esa letra
-window.addEventListener('keydown', (e)=>{
-  const key = e.key.toLowerCase();
-  if(!/^[a-zñáéíóúü ]$/.test(key)) return;
-  const normalized = key.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const buttons = Array.from(document.querySelectorAll('.letter-btn')).filter(b=>!b.disabled);
-  const target = buttons.find(b=>b.dataset.letter === normalized);
-  if(target) target.click();
-});
-
-// iniciar
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadList();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const nameModal = document.getElementById('nameModal');
-  const playerNameInput = document.getElementById('playerNameInput');
-  const startGameBtn = document.getElementById('startGameBtn');
-  const playerNameDisplay = document.getElementById('playerNameDisplay');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const showRankingBtn = document.getElementById('showRankingBtn');
-
-  const GAME_DURATION = 10 * 60; // 10 minutos en segundos
-  let playerName = 'Jugador';
-  let wordsShown = 0;
-  let wordsCompleted = 0;
-  let gameStartTs = 0;
-
-  const timer = new Timer();
-
-  function startGame() {
-    playerName = (playerNameInput.value || 'Jugador').trim();
-    playerNameDisplay.textContent = `Jugador: ${playerName}`;
-    nameModal.style.display = 'none';
-    wordsShown = 0;
-    wordsCompleted = 0;
-    gameStartTs = Date.now();
-
-    // comenzar temporizador
-    timer.start(GAME_DURATION, (remaining) => {
-      timerDisplay.textContent = Timer.format(remaining);
-    }, onTimeUp);
-
-    // TODO: inicializar o reiniciar la lógica actual del juego (mostrar primera palabra)
-    // Si tu app.js ya tiene función para iniciar juego, llama a ella aquí.
-    if (typeof initGame === 'function') initGame(); // optional hook
-  }
-
-  startGameBtn.addEventListener('click', startGame);
-  playerNameInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') startGame();
-  });
-
-  // Mostrar ranking
-  showRankingBtn.addEventListener('click', () => {
-    const top = Storage.getTop();
-    if (!top || top.length === 0) {
-      alert('No hay registros aún.');
+function loadImages() {
+  // Intentar primero con el endpoint PHP, sino caer en list.json
+  const endpoints = ['images/list.php'];
+  
+  const tryFetch = (index) => {
+    if (index >= endpoints.length) {
+      elements.message.textContent = '❌ No se encontraron imágenes.';
       return;
     }
-    const text = top.map((r, i) => `${i+1}. ${r.name} — ${r.completed}/${r.total} en ${r.timeTakenSeconds || 0}s`).join('\n');
-    alert('Top 10:\n' + text);
+    
+    fetch(endpoints[index])
+      .then(r => r.json())
+      .then(data => {
+        if (!Array.isArray(data) || data.length === 0) throw new Error('Vacío');
+        state.images = shuffle(data);
+        state.currentIdx = 0;
+        // Game is ready, but wait for start button
+      })
+      .catch(() => tryFetch(index + 1));
+  };
+  
+  tryFetch(0);
+}
+
+function renderCurrentWord() {
+  if (state.images.length === 0) return;
+  
+  const filename = state.images[state.currentIdx];
+  const word = normalizeWord(filename);
+  
+  // Feedback visual: fade
+  elements.image.style.opacity = 0;
+  setTimeout(() => {
+    elements.image.src = `images/${filename}`;
+    elements.image.style.opacity = 1;
+  }, 150);
+  
+  elements.boxes.innerHTML = '';
+  elements.letters.innerHTML = '';
+  elements.message.textContent = '';
+  state.nextPos = 0;
+  state.wordsShown++;
+
+  const chars = Array.from(word);
+  const boxes = [];
+  
+  chars.forEach(ch => {
+    const box = document.createElement('div');
+    if (ch === ' ') {
+      box.className = 'box space';
+    } else {
+      box.className = 'box';
+      box.dataset.filled = 'false';
+      boxes.push(box);
+    }
+    elements.boxes.appendChild(box);
   });
 
-  function onTimeUp() {
-    endGame();
-  }
+  state.targetLetters = chars.filter(c => c !== ' ');
+  state.currentBoxes = boxes; // Guardar referencia para rellenar
 
-  // Funciones para que el juego actual actualice contadores:
-  // Llama a incrementShown() cada vez que se muestra una nueva palabra.
-  // Llama a incrementCompleted() cuando el jugador completa correctamente una palabra.
-  window.incrementShown = function() {
-    wordsShown += 1;
+  // Teclas mezcladas
+  const letterPool = shuffle([...state.targetLetters]);
+  letterPool.forEach(ltr => {
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn shadow-sm';
+    btn.textContent = ltr.toUpperCase();
+    btn.dataset.letter = ltr;
+    btn.onclick = () => onLetterSelect(btn);
+    elements.letters.appendChild(btn);
+  });
+}
+
+function onLetterSelect(btn) {
+  if (!state.isRunning || btn.disabled) return;
+  
+  const selected = btn.dataset.letter;
+  const correct = state.targetLetters[state.nextPos];
+  
+  if (selected === correct) {
+    // Acierto
+    const box = state.currentBoxes[state.nextPos];
+    box.textContent = selected.toUpperCase();
+    box.dataset.filled = 'true';
+    btn.disabled = true;
+    state.nextPos++;
+    
+    if (state.nextPos >= state.targetLetters.length) {
+      state.wordsCompleted++;
+      elements.message.innerHTML = '¡Excelente! 💪✨';
+      elements.message.classList.add('text-success');
+      audio.success();
+      audio.speak(normalizeWord(state.images[state.currentIdx]));
+      
+      // Pasar a la siguiente automáticamente tras un breve delay
+      setTimeout(() => {
+        nextWord();
+      }, 1500);
+    }
+  } else {
+    // Error
+    audio.error();
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 400);
+  }
+}
+
+function nextWord() {
+  state.currentIdx = (state.currentIdx + 1) % state.images.length;
+  renderCurrentWord();
+}
+
+// --- Gestión de Sesión ---
+
+function startNewGame() {
+  state.playerName = (elements.nameInput.value || 'Jugador').trim();
+  elements.playerNameDisplay.textContent = `Jugador: ${state.playerName}`;
+  state.wordsShown = 0;
+  state.wordsCompleted = 0;
+  state.gameStartTs = Date.now();
+  state.isRunning = true;
+  
+  elements.nameModal.hide();
+  renderCurrentWord();
+  
+  timer.start(GAME_DURATION, (rem) => {
+    elements.timerDisplay.textContent = Timer.format(rem);
+    if (rem < 30) elements.timerDisplay.classList.replace('bg-secondary', 'bg-danger');
+    else elements.timerDisplay.classList.replace('bg-danger', 'bg-secondary');
+  }, onGameOver);
+}
+
+function onGameOver() {
+  state.isRunning = false;
+  timer.stop();
+  
+  const timeTaken = Math.floor((Date.now() - state.gameStartTs) / 1000);
+  const record = {
+    name: state.playerName,
+    completed: state.wordsCompleted,
+    total: state.wordsShown,
+    timeTakenSeconds: timeTaken,
+    timestamp: Date.now()
   };
+  
+  Storage.addRecord(record);
+  
+  // Mostrar modal final
+  elements.finalPlayerName.textContent = state.playerName;
+  elements.finalCompletedCount.textContent = state.wordsCompleted;
+  elements.finalTotalCount.textContent = state.wordsShown;
+  elements.gameOverModal.show();
+}
 
-  window.incrementCompleted = function() {
-    wordsCompleted += 1;
+async function showRanking() {
+  const top = await Storage.getTop();
+  elements.rankingTableBody.innerHTML = '';
+  
+  if (top.length === 0) {
+    elements.rankingTableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay récords todavía 🌟</td></tr>';
+  } else {
+    top.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      const crown = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+      tr.innerHTML = `
+        <td class="ps-4 fw-bold">${crown}</td>
+        <td>${r.name}</td>
+        <td class="text-center">${r.completed}/${r.total}</td>
+        <td class="text-center text-muted small">${r.timeTakenSeconds}s</td>
+      `;
+      elements.rankingTableBody.appendChild(tr);
+    });
+  }
+  elements.rankingModal.show();
+}
+
+// --- Inicialización ---
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadImages();
+  
+  // Pre-rellenar nombre si existe (usar local para rapidez inicial)
+  const last = Storage.loadLocal()[0];
+  if (last) elements.nameInput.value = last.name;
+  
+  // Intentar refrescar desde el servidor en segundo plano
+  Storage.getTop();
+  
+  // Mostrar modal de inicio tras un pequeño delay
+  setTimeout(() => elements.nameModal.show(), 500);
+
+  // Asegurar foco y selección completa para sobreescribir
+  document.getElementById('nameModal').addEventListener('shown.bs.modal', () => {
+    elements.nameInput.focus();
+    elements.nameInput.select();
+  });
+
+  // Eventos
+  elements.startGameBtn.onclick = startNewGame;
+  elements.nameInput.onkeydown = (e) => (e.key === 'Enter' && startNewGame());
+  elements.passBtn.onclick = () => state.isRunning && nextWord();
+  elements.showRankingBtn.onclick = showRanking;
+
+  // Soporte teclado físico
+  window.onkeydown = (e) => {
+    if (!state.isRunning) return;
+    const key = e.key.toLowerCase();
+    if (!/^[a-zñáéíóúü ]$/.test(key)) return;
+    
+    const normalized = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const activeBtns = Array.from(elements.letters.querySelectorAll('.letter-btn:not(:disabled)'));
+    const target = activeBtns.find(b => b.dataset.letter === normalized);
+    if (target) target.click();
   };
-
-  function endGame() {
-    timer.stop();
-    const timeTakenSeconds = Math.floor((Date.now() - gameStartTs) / 1000);
-    const record = {
-      name: playerName,
-      completed: wordsCompleted,
-      total: wordsShown,
-      timeTakenSeconds,
-      timestamp: Date.now()
-    };
-    const top = Storage.addRecord(record);
-    // mostrar resumen
-    alert(`Tiempo terminado.\nCompletadas: ${wordsCompleted}/${wordsShown}\nTu puesto (si quedó en top):\n` +
-      (top.findIndex(r => r.timestamp === record.timestamp) + 1 || 'No entró en top'));
-    // TODO: detener/poner en pausa la lógica del juego actual
-    if (typeof pauseGame === 'function') pauseGame(); // optional hook
-  }
-
-  // Exponer función para terminar manualmente (por ejemplo botón)
-  window.endCurrentGame = endGame;
-
-  // Si quieres que el modal desaparezca y comience con nombre guardado previamente:
-  const lastRecords = Storage.getTop();
-  if (lastRecords && lastRecords.length > 0 && lastRecords[0].name) {
-    // prefill input con último jugador conocido
-    playerNameInput.value = lastRecords[0].name;
-  }
 });

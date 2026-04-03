@@ -1,5 +1,4 @@
 <?php
-<?php
 header('Content-Type: application/json; charset=utf-8');
 
 $recordFile = __DIR__ . '/../record.json'; // ajusta la ruta si hace falta
