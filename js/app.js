@@ -13,7 +13,7 @@ const state = {
   currentIdx: 0,
   targetLetters: [],
   nextPos: 0,
-  playerName: 'Jugador',
+  playerName: 'Invitado', // Nombre por defecto
   wordsShown: 0,
   wordsCompleted: 0,
   gameStartTs: 0,
@@ -31,14 +31,20 @@ const elements = {
   playerNameDisplay: document.getElementById('playerNameDisplay'),
   timerDisplay: document.getElementById('timerDisplay'),
   // Modales (instancias de Bootstrap)
-  nameModal: new bootstrap.Modal(document.getElementById('nameModal')),
+  startScreenModal: new bootstrap.Modal(document.getElementById('startScreenModal')),
   rankingModal: new bootstrap.Modal(document.getElementById('rankingModal')),
   gameOverModal: new bootstrap.Modal(document.getElementById('gameOverModal')),
+  helpModal: new bootstrap.Modal(document.getElementById('helpModal')),
+  sidebar: new bootstrap.Offcanvas(document.getElementById('sidebarMenu')),
   // Inputs y Displays de Modales
   nameInput: document.getElementById('playerNameInput'),
   startGameBtn: document.getElementById('startGameBtn'),
+  saveScoreBtn: document.getElementById('saveScoreBtn'),
+  sidebarRankingBtn: document.getElementById('sidebarRankingBtn'),
+  sidebarNewGameBtn: document.getElementById('sidebarNewGameBtn'),
+  saveScoreSection: document.getElementById('saveScoreSection'),
+  scoreSavedFeedback: document.getElementById('scoreSavedFeedback'),
   rankingTableBody: document.getElementById('rankingTableBody'),
-  finalPlayerName: document.getElementById('finalPlayerName'),
   finalCompletedCount: document.getElementById('finalCompletedCount'),
   finalTotalCount: document.getElementById('finalTotalCount')
 };
@@ -216,20 +222,31 @@ function nextWord() {
 // --- Gestión de Sesión ---
 
 function startNewGame() {
-  state.playerName = (elements.nameInput.value || 'Jugador').trim();
-  elements.playerNameDisplay.textContent = `Jugador: ${state.playerName}`;
+  state.playerName = 'Invitado'; // Reiniciar a invitado
   state.wordsShown = 0;
   state.wordsCompleted = 0;
   state.gameStartTs = Date.now();
   state.isRunning = true;
   
-  elements.nameModal.hide();
+  elements.startScreenModal.hide();
+  elements.sidebar.hide(); 
+  
+  // Resetear secciones del modal de fin
+  elements.saveScoreSection.classList.remove('d-none');
+  elements.scoreSavedFeedback.classList.add('d-none');
+  elements.nameInput.value = '';
+
   renderCurrentWord();
   
   timer.start(GAME_DURATION, (rem) => {
     elements.timerDisplay.textContent = Timer.format(rem);
-    if (rem < 30) elements.timerDisplay.classList.replace('bg-secondary', 'bg-danger');
-    else elements.timerDisplay.classList.replace('bg-danger', 'bg-secondary');
+    if (rem < 30) {
+      elements.timerDisplay.classList.remove('bg-secondary');
+      elements.timerDisplay.classList.add('bg-danger');
+    } else {
+      elements.timerDisplay.classList.remove('bg-danger');
+      elements.timerDisplay.classList.add('bg-secondary');
+    }
   }, onGameOver);
 }
 
@@ -237,22 +254,38 @@ function onGameOver() {
   state.isRunning = false;
   timer.stop();
   
+  elements.finalCompletedCount.textContent = state.wordsCompleted;
+  elements.finalTotalCount.textContent = state.wordsShown;
+  elements.gameOverModal.show();
+}
+
+async function saveScore() {
+  const name = (elements.nameInput.value || 'Jugador').trim();
   const timeTaken = Math.floor((Date.now() - state.gameStartTs) / 1000);
+  
   const record = {
-    name: state.playerName,
+    name: name,
     completed: state.wordsCompleted,
     total: state.wordsShown,
     timeTakenSeconds: timeTaken,
     timestamp: Date.now()
   };
   
-  Storage.addRecord(record);
+  // Mostrar feedback visual
+  elements.saveScoreBtn.disabled = true;
+  elements.saveScoreBtn.textContent = 'Guardando...';
   
-  // Mostrar modal final
-  elements.finalPlayerName.textContent = state.playerName;
-  elements.finalCompletedCount.textContent = state.wordsCompleted;
-  elements.finalTotalCount.textContent = state.wordsShown;
-  elements.gameOverModal.show();
+  try {
+    await Storage.addRecord(record);
+    elements.saveScoreSection.classList.add('d-none');
+    elements.scoreSavedFeedback.classList.remove('d-none');
+  } catch (error) {
+    console.error("Error saving score:", error);
+    alert("Hubo un problema al guardar el récord. Revisa tu conexión.");
+  } finally {
+    elements.saveScoreBtn.disabled = false;
+    elements.saveScoreBtn.textContent = 'Guardar mi Récord 🌟';
+  }
 }
 
 async function showRanking() {
@@ -282,31 +315,33 @@ async function showRanking() {
 document.addEventListener('DOMContentLoaded', () => {
   loadImages();
   
-  // Pre-rellenar nombre si existe (usar local para rapidez inicial)
-  const last = Storage.loadLocal()[0];
-  if (last) elements.nameInput.value = last.name;
-  
-  // Intentar refrescar desde el servidor en segundo plano
-  Storage.getTop();
-  
-  // Mostrar modal de inicio tras un pequeño delay
-  setTimeout(() => elements.nameModal.show(), 500);
+  // Mostrar pantalla inicial tras cargar recursos
+  setTimeout(() => elements.startScreenModal.show(), 500);
 
-  // Asegurar foco y selección completa para sobreescribir
-  document.getElementById('nameModal').addEventListener('shown.bs.modal', () => {
-    elements.nameInput.focus();
-    elements.nameInput.select();
-  });
-
-  // Eventos
+  // Eventos de botones
   elements.startGameBtn.onclick = startNewGame;
-  elements.nameInput.onkeydown = (e) => (e.key === 'Enter' && startNewGame());
+  elements.saveScoreBtn.onclick = saveScore;
+  
+  // Eventos de Sidebar
+  elements.sidebarRankingBtn.onclick = () => {
+    elements.sidebar.hide();
+    showRanking();
+  };
+  
+  elements.sidebarNewGameBtn.onclick = () => {
+    elements.sidebar.hide();
+    startNewGame();
+  };
+
   elements.passBtn.onclick = () => state.isRunning && nextWord();
-  elements.showRankingBtn.onclick = showRanking;
 
   // Soporte teclado físico
   window.onkeydown = (e) => {
     if (!state.isRunning) return;
+    
+    // Evitar que el teclado físico funcione si hay un modal abierto (ej. el de fin de juego)
+    if (document.querySelector('.modal.show')) return;
+
     const key = e.key.toLowerCase();
     if (!/^[a-zñáéíóúü ]$/.test(key)) return;
     

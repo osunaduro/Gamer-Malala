@@ -16,13 +16,42 @@
   
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
     <div class="container">
-      <span class="navbar-brand mb-0 h1">🎨 Aprendo a escribir</span>
       <div class="d-flex align-items-center">
-        <span id="playerNameDisplay" class="badge bg-light text-primary me-3 fs-6">Jugador: —</span>
+        <button class="btn btn-primary me-2 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-brand mb-0 h1">🎨 Aprendo a escribir</span>
+      </div>
+      <div class="d-flex align-items-center">
+        <span id="playerNameDisplay" class="badge bg-light text-primary me-3 fs-6 d-none">Jugador: —</span>
         <span id="timerDisplay" class="badge bg-secondary fs-5 font-monospace">00:00</span>
       </div>
     </div>
   </nav>
+
+  <!-- Sidebar (Offcanvas) -->
+  <div class="offcanvas offcanvas-start bg-light" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+    <div class="offcanvas-header bg-primary text-white">
+      <h5 class="offcanvas-title" id="sidebarMenuLabel">Menú Principal</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+      <div class="list-group list-group-flush">
+        <button type="button" class="list-group-item list-group-item-action active p-3 border-0" aria-current="true" id="sidebarNewGameBtn">
+          <i class="me-2">🎮</i> Nuevo Juego
+        </button>
+        <button type="button" class="list-group-item list-group-item-action p-3 border-0" id="sidebarRankingBtn">
+          <i class="me-2">🏆</i> Ver Ranking Global
+        </button>
+        <button type="button" class="list-group-item list-group-item-action p-3 border-0" data-bs-toggle="modal" data-bs-target="#helpModal">
+          <i class="me-2">❓</i> Cómo Jugar / Ayuda
+        </button>
+      </div>
+      <div class="mt-auto p-4 text-center border-top">
+        <small class="text-muted">Desarrollado para Malala</small>
+      </div>
+    </div>
+  </div>
 
   <main class="container">
     <div class="row justify-content-center">
@@ -37,11 +66,8 @@
           
           <div class="card-footer bg-white border-0 p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <button id="passBtn" class="btn btn-outline-warning rounded-pill px-4 shadow-sm" type="button">
-                Saltar ⏭️
-              </button>
-              <button id="showRankingBtn" class="btn btn-outline-info rounded-pill px-4 shadow-sm" type="button">
-                Ranking 🏆
+              <button id="passBtn" class="btn btn-outline-warning rounded-pill px-4 shadow-sm w-100" type="button">
+                Saltar esta palabra ⏭️
               </button>
             </div>
 
@@ -64,18 +90,42 @@
     </div>
   </main>
 
-  <!-- Modal de Inicio -->
-  <div class="modal fade" id="nameModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="nameModalLabel" aria-hidden="true">
+  <!-- Modal Inicial (Directo al juego) -->
+  <div class="modal fade" id="startScreenModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4 text-center">
+        <div class="modal-body p-5">
+          <h1 class="display-4 text-primary mb-2">🎨</h1>
+          <h2 class="mb-4 text-primary font-weight-bold">¡Hola! ¿Vamos a jugar?</h2>
+          <p class="text-muted mb-4 fs-5">Tendrás 5 minutos para escribir todas las palabras que puedas.</p>
+          <button id="startGameBtn" type="button" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm">
+            ¡Empezar a Jugar! 🚀
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Ayuda (Nuevo) -->
+  <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow rounded-4">
-        <div class="modal-header bg-primary text-white border-0 py-3">
-          <h5 class="modal-title" id="nameModalLabel">¡Hola! Ingresa tu nombre</h5>
+        <div class="modal-header bg-info text-white border-0 py-3">
+          <h5 class="modal-title" id="helpModalLabel">¿Cómo jugar?</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4">
-          <input id="playerNameInput" type="text" class="form-control form-control-lg rounded-pill border-primary text-center" placeholder="Tu nombre artístico" autofocus />
+          <p>Es muy sencillo:</p>
+          <ol>
+            <li>Observa la imagen que aparece en pantalla.</li>
+            <li>Haz clic en las letras para escribir el nombre de lo que ves. No te preocupes por el orden de los botones, ¡solo toca las letras correctas!</li>
+            <li>Si aciertas, pasarás a la siguiente palabra automáticamente y escucharás la palabra pronunciada.</li>
+            <li>Si te equivocas, la letra se pondrá roja por un momento.</li>
+            <li>¡Tienes 5 minutos para completar tantas como puedas!</li>
+          </ol>
         </div>
         <div class="modal-footer border-0 p-4 pt-0">
-          <button id="startGameBtn" type="button" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm">¡Comenzar! 🚀</button>
+          <button type="button" class="btn btn-primary rounded-pill w-100" data-bs-dismiss="modal">¡Entendido!</button>
         </div>
       </div>
     </div>
@@ -110,19 +160,25 @@
     </div>
   </div>
 
-  <!-- Modal de Fin de Juego -->
-  <div class="modal fade" id="gameOverModal" tabindex="-1" aria-hidden="true">
+  <!-- Modal de Fin de Juego (Actualizado para guardar récord) -->
+  <div class="modal fade" id="gameOverModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow rounded-4 text-center">
         <div class="modal-body p-5">
           <h2 class="display-4 text-primary mb-4">¡Tiempo terminado! ⏰</h2>
-          <p class="fs-4">Buen trabajo, <span id="finalPlayerName" class="fw-bold text-success"></span>.</p>
           <div class="bg-light p-4 rounded-4 mb-4">
             <p class="mb-1 text-muted">Completaste</p>
             <h3 class="display-5 mb-0"><span id="finalCompletedCount">0</span>/<span id="finalTotalCount">0</span></h3>
             <p class="mb-0">palabras correctamente.</p>
           </div>
-          <button type="button" class="btn btn-primary btn-lg rounded-pill px-5" data-bs-dismiss="modal">Aceptar</button>
+          
+          <div id="saveScoreSection">
+            <p class="fs-5 mt-4">¡Excelente trabajo! ¿Quieres guardar tu récord?</p>
+            <div class="form-group mb-3">
+              <input id="playerNameInput" type="text" class="form-control form-control-lg rounded-pill border-primary text-center" placeholder="Tu nombre o apodo" />
+            </div>
+            <button id="saveScoreBtn" type="button" class="btn btn-success btn-lg rounded-pill w-100 shadow-sm mb-2">Guardar mi Récord 🌟</button>
+          <button type="button" class="btn btn-outline-secondary rounded-pill w-100" data-bs-dismiss="modal" id="closeGameOverBtn">Cerrar</button>
         </div>
       </div>
     </div>
