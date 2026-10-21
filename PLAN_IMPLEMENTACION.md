@@ -54,14 +54,13 @@ El código del juego y sus datos editables se separan. Por ejemplo, el motor par
 
 ### 2. Crear el plugin base y el catálogo
 
-- Crear la estructura del plugin propio de WordPress dentro del repositorio.
-- Implementar lectura segura de `games/*/game.json`, validación de campos y manejo de paquetes inválidos.
-- Permitir sincronizar el catálogo desde el área de administración; no recorrer las carpetas en cada visita pública.
-- Mostrar tarjetas por materia y rango de edad con nombre, descripción y edad recomendada.
-- Crear una vista de lanzamiento para cada juego.
-- Restringir instalación y sincronización a administradores autorizados.
+- La estructura inicial está en `wordpress-plugin/malala-juegos/`.
+- Incluye lectura y validación de `games/*/game.json`, manejo administrativo de paquetes inválidos y sincronización manual; las carpetas no se recorren en visitas públicas.
+- Incluye el shortcode `[malala_games]`, tarjetas de catálogo y una vista de lanzamiento en `iframe sandbox` con puente inicial `MessageChannel`.
+- Incluye el paquete `demo-integracion` para mostrar el uso del protocolo; es una demostración técnica, no contenido curricular.
+- La sincronización está restringida a administradores con nonce. Falta instalar y revisar el plugin en una instancia de WordPress antes de considerarlo apto para despliegue.
 
-**Entregable:** plugin instalable y catálogo que muestra un paquete de ejemplo.
+**Entregable:** base inicial del plugin y catálogo implementados; validación en WordPress local pendiente.
 
 ### 3. Migrar el juego de escritura
 
