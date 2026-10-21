@@ -58,9 +58,10 @@ El código del juego y sus datos editables se separan. Por ejemplo, el motor par
 - Incluye lectura y validación de `games/*/game.json`, manejo administrativo de paquetes inválidos y sincronización manual; las carpetas no se recorren en visitas públicas.
 - Incluye el shortcode `[malala_games]`, tarjetas de catálogo y una vista de lanzamiento en `iframe sandbox` con puente inicial `MessageChannel`.
 - Incluye el paquete `demo-integracion` para mostrar el uso del protocolo; es una demostración técnica, no contenido curricular.
-- La sincronización está restringida a administradores con nonce. Falta instalar y revisar el plugin en una instancia de WordPress antes de considerarlo apto para despliegue.
+- La sincronización está restringida a administradores con nonce. En la instalación local el plugin quedó activo, el paquete de demostración sincronizó sin errores y se publicó la página **Juegos** con `[malala_games]`.
+- La primera apertura del paquete confirmó el intercambio `platform:init` / `game:ready` dentro del iframe. Falta revisar el flujo en otros navegadores y tamaños de pantalla antes de considerar el plugin listo para despliegue.
 
-**Entregable:** base inicial del plugin y catálogo implementados; validación en WordPress local pendiente.
+**Entregable:** base inicial del plugin activa en WordPress local; revisión técnica y de pantallas pendientes.
 
 ### 3. Migrar el juego de escritura
 
