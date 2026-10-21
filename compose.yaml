@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:?Copiá .env.example a .env}
+      MARIADB_USER: ${MARIADB_USER:?Copiá .env.example a .env}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Copiá .env.example a .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Copiá .env.example a .env}
+    volumes:
+      - malala_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${WORDPRESS_PORT:-8088}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MARIADB_DATABASE}
+      WORDPRESS_DB_USER: ${MARIADB_USER}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: malala_
+    volumes:
+      - malala_wordpress_data:/var/www/html
+      - ./wordpress-plugin/malala-juegos:/var/www/html/wp-content/plugins/malala-juegos
+
+volumes:
+  malala_db_data:
+  malala_wordpress_data:
