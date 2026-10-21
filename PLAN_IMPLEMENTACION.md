@@ -47,7 +47,7 @@ El código del juego y sus datos editables se separan. Por ejemplo, el motor par
 
 - La primera versión del contrato está documentada en [CONTRATO_PAQUETES_JUEGO.md](CONTRATO_PAQUETES_JUEGO.md).
 - Antes de codificar el plugin, revisar el esquema y confirmar que describe el paquete actual de escritura sin forzar cambios innecesarios.
-- Cerrar el aislamiento de la vista y el canal seguro para configuración y eventos.
+- La propuesta de aislamiento y canal de mensajes está en [DISENO_INTEGRACION_JUEGOS.md](DISENO_INTEGRACION_JUEGOS.md); validarla contra el juego actual y el hosting.
 - Mantener el contrato pequeño y versionado para que cada juego pueda desarrollarse por separado.
 
 **Entregable:** especificación revisable, manifiesto de ejemplo y criterios de validación.

@@ -76,7 +76,7 @@ El plugin rechazará paquetes con JSON inválido, campos requeridos ausentes, id
 
 El catálogo lee los metadatos validados y muestra una tarjeta con nombre, descripción, materia, edades y grados recomendados, y dificultad disponible. No interpreta HTML del manifiesto.
 
-Al elegir el juego, el portal presenta una pantalla breve de instrucciones y opciones comunes, y luego abre el archivo `entry` en una vista de juego adaptable. El mecanismo de aislamiento (página propia o `iframe` con permisos acotados) se decidirá al implementar el plugin. Hasta entonces, el paquete no debe depender de acceso al DOM de WordPress ni asumir que comparte el mismo origen de JavaScript.
+Al elegir el juego, el portal presenta una pantalla breve de instrucciones y opciones comunes, y luego abre el archivo `entry` en una vista de juego adaptable. La propuesta inicial de aislamiento y comunicación está en [DISENO_INTEGRACION_JUEGOS.md](DISENO_INTEGRACION_JUEGOS.md): `iframe` con permisos mínimos y un puente de mensajes versionado. Antes de codificar se validará esta propuesta con el juego actual y el hosting. El paquete no debe depender del DOM de WordPress ni asumir que comparte el mismo origen de JavaScript.
 
 ## 4. Interfaz común y eventos
 
@@ -86,9 +86,9 @@ La plataforma ofrecerá una interfaz documentada y versionada para que el juego 
 - recibir configuración de sesión, como duración, dificultad y modo de práctica;
 - informar eventos de desempeño con una estructura común.
 
-Eventos iniciales previstos: `answer_submitted` (resultado correcto/incorrecto e intentos), `hint_used`, `difficulty_changed`, `activity_completed` y `session_completed`. Cada evento lleva `eventVersion`, `gameId`, `sessionId`, marca temporal y los campos propios del evento. No debe enviar nombre, apellido, apodo, correo ni otros identificadores del alumno.
+Eventos iniciales previstos: `answer_submitted` (resultado correcto/incorrecto e intentos), `hint_used`, `difficulty_changed`, `activity_completed` y `session_completed`. El puente lleva `protocolVersion`; el portal agrega `gameId`, `sessionId` y la marca de recepción al contexto de cada evento. El paquete no debe enviar nombre, apellido, apodo, correo ni otros identificadores del alumno.
 
-Durante la primera entrega, el juego individual libre procesa y conserva sus resultados en el navegador. La futura modalidad docente podrá enviar eventos al servidor solo dentro de una sesión de aula autorizada y bajo los permisos definidos en el plan maestro. Los nombres concretos de los campos de evento y el transporte se especificarán antes de implementar esa integración; este contrato no autoriza al juego a hacer llamadas arbitrarias al servidor.
+Durante la primera entrega, el juego individual libre procesa y conserva sus resultados en el navegador. La futura modalidad docente podrá enviar eventos al servidor solo dentro de una sesión de aula autorizada y bajo los permisos definidos en el plan maestro. El protocolo propuesto y sus límites están en [DISENO_INTEGRACION_JUEGOS.md](DISENO_INTEGRACION_JUEGOS.md); se validará antes de implementar el plugin. Este contrato no autoriza al juego a hacer llamadas arbitrarias al servidor.
 
 ## 5. Sincronización y seguridad
 
@@ -114,6 +114,7 @@ Un paquete se considera listo para aparecer en el catálogo cuando:
 - Confirmar el directorio definitivo del plugin y la ruta `games/`.
 - Precisar el esquema JSON mediante validación en código y ejemplos inválidos.
 - Elegir el aislamiento y el canal de configuración/eventos entre WordPress y el juego.
+- Validar la propuesta de `DISENO_INTEGRACION_JUEGOS.md` contra navegador y hosting.
 - Decidir cómo administra WordPress los datos variables de las actividades.
 - Verificar el hosting y el entorno de desarrollo antes de fijar requisitos de PHP y despliegue.
 
