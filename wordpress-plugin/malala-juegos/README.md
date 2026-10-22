@@ -18,7 +18,7 @@ Cada carpeta contiene `game.json` y un archivo HTML de inicio. Los juegos son es
 - `CONTRATO_PAQUETES_JUEGO.md`
 - `DISENO_INTEGRACION_JUEGOS.md`
 
-`games/demo-integracion/` es una demostración técnica del protocolo, no una actividad curricular lista para alumnos.
+`games/escribir-palabras/` es el primer juego curricular integrado. Sus palabras e imágenes todavía se editan en los archivos del paquete; el panel para administrarlas desde WordPress queda pendiente.
 
 ## Alcance actual
 
@@ -27,5 +27,6 @@ Cada carpeta contiene `game.json` y un archivo HTML de inicio. Los juegos son es
 - Instrucciones breves y apertura en `iframe sandbox="allow-scripts"`.
 - Puente `MessageChannel` versión 1 para configuración inicial y eventos locales.
 - Los eventos de juego libre no se guardan en servidor.
+- El juego inicial de escritura incluye 15 palabras con imágenes locales, pistas y ajuste automático de dificultad; su resumen vive solo en la sesión actual.
 
-Todavía no están implementados el guardado local común, el panel de contenidos, la migración del juego de escritura, las cuentas docentes ni las aulas.
+Todavía no están implementados el guardado local común, el panel de contenidos, las cuentas docentes ni las aulas.

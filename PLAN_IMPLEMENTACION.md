@@ -57,21 +57,21 @@ El código del juego y sus datos editables se separan. Por ejemplo, el motor par
 - La estructura inicial está en `wordpress-plugin/malala-juegos/`.
 - Incluye lectura y validación de `games/*/game.json`, manejo administrativo de paquetes inválidos y sincronización manual; las carpetas no se recorren en visitas públicas.
 - Incluye el shortcode `[malala_games]`, tarjetas de catálogo y una vista de lanzamiento en `iframe sandbox` con puente inicial `MessageChannel`.
-- Incluye el paquete `demo-integracion` para mostrar el uso del protocolo; es una demostración técnica, no contenido curricular.
-- La sincronización está restringida a administradores con nonce. En la instalación local el plugin quedó activo, el paquete de demostración sincronizó sin errores y se publicó la página **Juegos** con `[malala_games]`.
-- La primera apertura del paquete confirmó el intercambio `platform:init` / `game:ready` dentro del iframe. Falta revisar el flujo en otros navegadores y tamaños de pantalla antes de considerar el plugin listo para despliegue.
+- La carpeta `demo-integracion` se usó como fixture temporal para validar `platform:init` / `game:ready`; se retiró del catálogo público al incorporar el primer juego curricular.
+- La sincronización está restringida a administradores con nonce. En WordPress local el plugin quedó activo, el catálogo sincroniza sin errores y la página **Juegos** usa `[malala_games]`.
+- La apertura del paquete y el flujo de respuesta se verificaron dentro del iframe. La revisión en otros navegadores y tamaños de pantalla sigue pendiente.
 
-**Entregable:** base inicial del plugin activa en WordPress local; revisión técnica y de pantallas pendientes.
+**Entregable:** plugin base activo en WordPress local y catálogo con el primer juego curricular.
 
 ### 3. Migrar el juego de escritura
 
-- Convertir la dinámica de imagen y formación de palabra en el primer paquete independiente.
-- Reutilizar solo imágenes y palabras que se revisen y aprueben.
-- Crear en WordPress la administración de palabras, imágenes y dificultad fácil/intermedia/desafiante.
-- Integrar el temporizador individual predeterminado de cinco minutos, audio del dispositivo con control visible, pieles, opciones de accesibilidad, pistas, ajuste de dificultad e insignias.
-- Mantener los resultados del juego libre en el navegador; no enviar seguimiento identificable al servidor.
+- **Primera versión implementada:** `games/escribir-palabras/` presenta una imagen y permite formar la palabra con letras.
+- Incluye 15 palabras e imágenes locales seleccionadas, pronunciación del dispositivo, pista solicitada o automática tras varios errores y ajuste de dificultad.
+- Usa un temporizador de cinco minutos en la partida libre y muestra un resumen de sesión sin pedir nombres ni enviar registros al servidor.
+- Los eventos de respuestas y adaptación pasan por el puente del portal.
+- Quedan pendientes el editor de contenidos en WordPress, control visible de audio, pieles, insignias, persistencia local de logros y validación de vocabulario/dificultad con docentes y chicos.
 
-**Entregable:** primer juego funcionando dentro del catálogo de WordPress.
+**Entregable:** primera versión funcional del juego de escritura dentro del catálogo de WordPress; lista para revisión de uso y contenido.
 
 ### 4. Revisar con los primeros jugadores
 

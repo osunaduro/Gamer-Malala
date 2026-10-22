@@ -1,0 +1,17 @@
+{
+  "contractVersion": 1,
+  "id": "escribir-palabras",
+  "name": "Formá la palabra",
+  "description": "Mirá la imagen y elegí las letras para escribir su nombre. Las pistas acompañan cada intento.",
+  "subject": "lengua",
+  "recommendedGrades": [1, 2, 3],
+  "recommendedAges": {
+    "min": 6,
+    "max": 9
+  },
+  "difficultyLevels": ["facil", "intermedio", "desafiante"],
+  "version": "0.1.0",
+  "entry": "index.html",
+  "thumbnail": "assets/portada.svg",
+  "capabilities": ["audio", "themes", "session-events"]
+}

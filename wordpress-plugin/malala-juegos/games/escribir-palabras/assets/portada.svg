@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Formá la palabra</title>
+  <desc id="desc">Una imagen de un gato y letras para formar su nombre</desc>
+  <rect width="720" height="420" rx="32" fill="#f3f6ff"/>
+  <circle cx="190" cy="205" r="112" fill="#fff"/>
+  <path d="M123 183 130 106l58 40 58-40 10 77v47c0 47-28 74-67 74s-66-27-66-74z" fill="#efa76d"/>
+  <path d="m145 195 26 7m44-7-26 7" fill="none" stroke="#27324b" stroke-linecap="round" stroke-width="8"/>
+  <path d="m185 219 9 7 9-7" fill="none" stroke="#a34f5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+  <path d="M174 244q20 18 40 0" fill="none" stroke="#27324b" stroke-linecap="round" stroke-width="6"/>
+  <g font-family="system-ui,sans-serif" font-weight="800" text-anchor="middle">
+    <rect x="347" y="122" width="77" height="82" rx="17" fill="#fff" stroke="#dce2f0" stroke-width="3"/><text x="385" y="178" font-size="45" fill="#5268d8">G</text>
+    <rect x="435" y="122" width="77" height="82" rx="17" fill="#fff" stroke="#dce2f0" stroke-width="3"/><text x="473" y="178" font-size="45" fill="#5268d8">A</text>
+    <rect x="523" y="122" width="77" height="82" rx="17" fill="#fff" stroke="#dce2f0" stroke-width="3"/><text x="561" y="178" font-size="45" fill="#5268d8">T</text>
+    <rect x="611" y="122" width="77" height="82" rx="17" fill="#fff" stroke="#dce2f0" stroke-width="3"/><text x="649" y="178" font-size="45" fill="#5268d8">O</text>
+    <text x="520" y="286" font-size="27" fill="#27324b">¡Formá la palabra!</text>
+  </g>
+</svg>

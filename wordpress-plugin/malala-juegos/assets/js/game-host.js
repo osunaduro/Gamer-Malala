@@ -32,6 +32,7 @@
             intro.hidden = true;
             wrap.hidden = false;
             status.textContent = 'Cargando el juego…';
+            wrap.scrollIntoView({ block: 'start', behavior: 'auto' });
 
             frame.addEventListener('error', () => showError('No pudimos abrir el juego. Volvé al catálogo e intentá otra vez.'), { once: true });
             frame.addEventListener('load', () => {

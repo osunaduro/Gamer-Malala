@@ -60,10 +60,10 @@
 .malala-game-launch__back { display: inline-block; margin-bottom: 1.5rem; }
 .malala-game-launch__intro { max-width: 42rem; margin: 0 auto; text-align: center; }
 .malala-game-launch__status { min-height: 1.5rem; text-align: center; }
-.malala-game-launch__frame-wrap { width: 100%; min-height: min(78vh, 780px); }
-.malala-game-launch__frame { display: block; width: 100%; min-height: min(78vh, 780px); border: 0; border-radius: 1rem; background: #fff; }
+.malala-game-launch__frame-wrap { width: 100%; min-height: min(84vh, 820px); }
+.malala-game-launch__frame { display: block; width: 100%; height: min(84vh, 820px); min-height: 650px; border: 0; border-radius: 1rem; background: #fff; }
 
 @media (max-width: 600px) {
-    .malala-game-launch__frame-wrap,
-    .malala-game-launch__frame { min-height: 82vh; }
+    .malala-game-launch__frame-wrap { min-height: 84vh; }
+    .malala-game-launch__frame { height: 84vh; min-height: 650px; }
 }
