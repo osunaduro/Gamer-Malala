@@ -64,6 +64,7 @@
 .malala-game-launch__frame { display: block; width: 100%; height: min(84vh, 820px); min-height: 650px; border: 0; border-radius: 1rem; background: #fff; }
 
 @media (max-width: 600px) {
+    .malala-game-launch { padding-right: 0; padding-left: 0; }
     .malala-game-launch__frame-wrap { min-height: 84vh; }
     .malala-game-launch__frame { height: 84vh; min-height: 650px; }
 }

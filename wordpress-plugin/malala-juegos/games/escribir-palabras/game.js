@@ -25,7 +25,7 @@
   const elements = Object.fromEntries([
     'welcome', 'activity', 'finish', 'start', 'again', 'timer-wrap', 'timer', 'progress-label', 'level-label',
     'progress-fill', 'picture', 'prompt', 'answer', 'letter-bank', 'hint', 'clear', 'feedback',
-    'finish-summary', 'connection-status'
+    'finish-title', 'finish-summary', 'summary-words', 'summary-hints', 'summary-time', 'progress-track', 'connection-status'
   ].map((id) => [id, document.getElementById(id)]));
 
   const state = {
@@ -100,6 +100,8 @@
   function updateProgress() {
     elements['progress-label'].textContent = `Palabra ${Math.min(state.index + 1, state.words.length)} de ${state.words.length}`;
     elements['progress-fill'].style.width = `${Math.min(100, (state.index / state.words.length) * 100)}%`;
+    elements['progress-track'].setAttribute('aria-valuemax', String(state.words.length));
+    elements['progress-track'].setAttribute('aria-valuenow', String(state.index));
     const level = LEVELS[state.level];
     elements['level-label'].textContent = LEVEL_NAMES[level];
   }
@@ -150,12 +152,14 @@
     state.hintsForWord = 0;
     elements.picture.src = `assets/images/${entry.image}`;
     elements.picture.alt = `Imagen de ${entry.word}`;
-    elements.prompt.textContent = 'Elegí las letras para formar la palabra.';
+    elements.prompt.textContent = 'Tocá las letras en orden para formar la palabra.';
     elements.feedback.textContent = '';
     elements['hint'].disabled = false;
     updateProgress();
     makeLetterBank();
     drawAnswer();
+    const firstLetter = state.buttons.find((item) => !item.used);
+    if (firstLetter) firstLetter.button.focus();
   }
 
   function setLevel(nextLevel) {
@@ -249,8 +253,16 @@
     elements.activity.hidden = true;
     elements.finish.hidden = false;
     elements['progress-fill'].style.width = '100%';
+    elements['progress-track'].setAttribute('aria-valuenow', String(state.index));
     const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
-    elements['finish-summary'].textContent = `Completaste ${state.correctWords} ${state.correctWords === 1 ? 'palabra' : 'palabras'} y usaste ${state.hintsUsed} ${state.hintsUsed === 1 ? 'pista' : 'pistas'}.`;
+    elements['finish-title'].textContent = reason === 'completed' ? '¡Terminaste las imágenes!' : '¡Gracias por jugar!';
+    elements['finish-summary'].textContent = reason === 'completed'
+      ? '¡Completaste todas las palabras! Cada intento te ayudó a practicar.'
+      : `Alcanzaste ${state.correctWords} ${state.correctWords === 1 ? 'palabra' : 'palabras'} durante esta partida. ¡Gracias por practicar!`;
+    elements['summary-words'].textContent = String(state.correctWords);
+    elements['summary-hints'].textContent = String(state.hintsUsed);
+    elements['summary-time'].textContent = formatTime(elapsed);
+    elements['finish-title'].focus();
     sendEvent('session_completed', {
       reason,
       completedActivities: state.correctWords,
@@ -310,6 +322,7 @@
   elements.again.addEventListener('click', () => {
     elements.finish.hidden = true;
     elements.welcome.hidden = false;
+    elements.start.focus();
   });
   elements.hint.addEventListener('click', () => giveHint(false));
   elements.clear.addEventListener('click', () => {
